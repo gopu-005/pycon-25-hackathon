@@ -1,92 +1,101 @@
-# PyCon25 Hackathon: Intelligent Support Ticket Assignment System
+# PyCon25 Hackathon — Intelligent Support Ticket Assignment System
 
-Welcome to the PyCon25 Hackathon project! 🚀
+A compact, explainable solution for routing support tickets to the most suitable agents while balancing load and considering availability and experience.
 
-Once you are done with the hackathon, share your github link here: https://forms.gle/gnR62EoZUfeA8zqJ9
-
-## 📋 Project Overview
-
-### Problem Statement
-
-In a helpdesk system, when customers raise support issues about different topics, we should ideally route tickets to agents who have knowledge and experience in solving that particular set of problems. However:
-
-- **Volume Imbalance**: Not all topics have equal request volumes
-- **Skill Gaps**: Not all agents have expertise in all areas
-- **Fair Distribution**: Workload needs to be distributed equitably
-- **Effective Resolution**: Tickets should go to the most capable agents
-
-### Challenge
-
-Build an optimal routing system that assigns support tickets to the best possible agent while ensuring:
-- ✅ Maximum likelihood of successful resolution
-- ✅ Fair distribution of workload across agents
-- ✅ Effective prioritization of issues
-- ✅ Cost-effective and scalable approach
-
-## 📊 Data Structure
-
-### Input: `dataset.json`
-Contains two main sections:
-- **Agents**: Support staff with skills, availability, and experience levels
-- **Tickets**: Support requests with descriptions and timestamps
-
-### Output: `output_result.json`
-Your solution should generate ticket assignments with the following fields:
-
-- **Mandatory:**
-   - Ticket ID
-   - Assigned Agent ID
-- **Optional:**
-   - Rationale/Justification for the assignment
-
-
-## 🎯 Evaluation Criteria
-
-Your solution will be judged on:
-
-1. **Assignment Effectiveness** 
-   - How well tickets are matched to agent skills
-   - Likelihood of successful resolution
-
-2. **Prioritization Strategy**
-   - Creative use of ticket and agent attributes
-   - Intelligent priority scoring
-
-3. **Load Balancing**
-   - Fair distribution of workload
-   - Agent availability management
-
-4. **Performance & Scalability**
-   - Cost efficiency of the approach
-   - Ability to handle large datasets
-
-## 🏗️ Project Structure
-
-```
-pycon25-hackathon/
-├── dataset.json           # Input data (agents and tickets)
-├── output_result.json     # Expected output
-├── README.md             # This file
-└── [your solution files] # Your implementation
-```
-
-## 📈 Success Metrics
-
-Your solution should optimize for:
-- **Resolution Rate**: Tickets assigned to skilled agents
-- **Response Time**: Efficient agent utilization
-- **Workload Distribution**: Balanced assignment across team
-- **Scalability**: Performance with increasing data size
-
-## 🤝 Contributing
-
-This is a hackathon project - unleash your creativity and build an innovative solution!
+This repository contains a minimal, extensible implementation that reads `dataset.json` (agents + tickets) and produces `output_result.json` with ticket assignments and a short rationale for each assignment.
 
 ---
 
-**Happy Hacking!** 🎉
+## Quick Start
 
+Requirements
+- Python 3.8+
 
+Run the assignment script from the project root (PowerShell shown):
 
+```powershell
+python .\solution.py
+```
 
+This will create or overwrite `output_result.json` with the assignment results in the same folder.
 
+---
+
+## Files in this repository
+
+- `dataset.json` — input data with `agents` and `tickets`.
+- `solution.py` — assignment algorithm (heuristic, explainable).
+- `output_result.json` — generated assignment results.
+- `README.md` — this file.
+
+---
+
+## What the solution does
+
+- Parses tickets and agents from `dataset.json`.
+- Extracts normalized tokens from ticket titles/descriptions.
+- Builds an agent scoring function that combines:
+  - skill match (agent skill levels),
+  - current load (penalty),
+  - experience (bonus), and
+  - availability (agents marked "Available" are considered).
+- Assigns each ticket to the best scoring available agent and increments their simulated load to distribute work.
+- Writes assignments with fields: `ticket_id`, `assigned_agent_id`, and `rationale`.
+
+The implementation is intentionally simple and deterministic — easy to inspect and extend.
+
+---
+
+## Design notes / scoring
+
+- Tokenization: ticket text is split into alphanumeric tokens, lowercased, and normalized (non-alphanumerics -> underscore). Agent skill names are normalized the same way.
+- Skill match: a direct token match with an agent skill adds skill-level-based points.
+- Load balancing: agents with higher `current_load` are penalized so subsequent assignments favor less-busy agents.
+- Experience: agents with higher `experience_level` receive a small bonus.
+- Availability: only agents with `availability_status: "Available"` are eligible.
+
+This scoring is a heuristic designed for clarity — swap in a trained model or more complex business rules as needed.
+
+---
+
+## Example output (snippet)
+
+```json
+{
+  "assignments": [
+    {
+      "ticket_id": "TKT-2025-001",
+      "assigned_agent_id": "agent_008",
+      "rationale": "Matched skills: None; Agent experience: 9; Current load after assignment: 3"
+    },
+    {
+      "ticket_id": "TKT-2025-002",
+      "assigned_agent_id": "agent_008",
+      "rationale": "Matched skills: None; Agent experience: 9; Current load after assignment: 4"
+    }
+  ]
+}
+```
+
+---
+
+## Edge cases handled
+
+- No available agents: ticket will be assigned `assigned_agent_id: null` with a rationale message.
+- Skill token mismatches: skill names and ticket tokens are normalized to reduce false negatives. Further synonym mapping can be added.
+- Tie-breakers: the scoring and load update strategy favors lower-load and higher-experience agents when scores are similar.
+- Large inputs: current heuristic is O(#tickets * #agents). For larger datasets, use inverted indices or candidate prefiltering.
+
+---
+
+## Next steps (recommended enhancements)
+
+- Add ticket priority or SLA-aware weighting so critical incidents are prioritized.
+- Incorporate historical resolution success per (agent, topic) to predict probability of resolution.
+- Add unit tests for tokenization, scoring, and assignment (pytest).
+- Expose CLI flags to control behavior (e.g., produce minimal output with only required fields).
+- Replace heuristics with a learn-to-rank model if labeled historic data is available.
+
+---
+
+If you want, I can add unit tests and a short CLI wrapper next — tell me which improvement you want and I'll implement it.
