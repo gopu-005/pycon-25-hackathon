@@ -60,6 +60,9 @@ This scoring is a heuristic designed for clarity — swap in a trained model or 
 
 ## Example output (snippet)
 
+### Screenshot
+![alt text](image.png)
+
 ```json
 {
   "assignments": [
@@ -88,14 +91,4 @@ This scoring is a heuristic designed for clarity — swap in a trained model or 
 
 ---
 
-## Next steps (recommended enhancements)
 
-- Add ticket priority or SLA-aware weighting so critical incidents are prioritized.
-- Incorporate historical resolution success per (agent, topic) to predict probability of resolution.
-- Add unit tests for tokenization, scoring, and assignment (pytest).
-- Expose CLI flags to control behavior (e.g., produce minimal output with only required fields).
-- Replace heuristics with a learn-to-rank model if labeled historic data is available.
-
----
-
-If you want, I can add unit tests and a short CLI wrapper next — tell me which improvement you want and I'll implement it.
